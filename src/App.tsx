@@ -6,7 +6,7 @@ import BezierEasing from "bezier-easing";
 
 const TURN: number = Math.PI / 2;
 const ANIMATION_FRAME_DELAY: number = 16;
-const DURATION: number = 10;
+const DURATION: number = 50;
 
 // TODO: refactor faces into a component taking in a list of pieces that are under its influence
 const faceNames: { [key: string]: string } = {
@@ -97,14 +97,12 @@ export default function App(): JSX.Element {
    * @param spline spline scene
    */
   function onLoad(spline: Application): void {
-    // load all faces
     const loadedFaces: Array<SPEObject | undefined> = [];
     for (const key in faceNames) {
       loadedFaces.push(get(spline, faceNames[key]));
     }
     setFaces(loadedFaces);
 
-    // load all pieces
     const loadedPieces: Array<SPEObject | undefined> = [];
     for (const key in pieceNames) {
       loadedPieces.push(get(spline, pieceNames[key]));
@@ -132,20 +130,19 @@ export default function App(): JSX.Element {
       function rotateFrame(): void {
         // if the animation isnt finished
         if (currentFrame < frames) {
-          // ensure face has been loaded properly
           if (faces[0]) {
-            // animate only the face
             faces[0].rotation.y =
               initial + angle * easing(currentFrame / frames);
             currentFrame++;
-            // update pieces associated with the face
             updateRPosition();
-            // delay
             setTimeout(rotateFrame, ANIMATION_FRAME_DELAY);
-          } else {
-            // animation is complete, allow for new animations
-            setAnimating(false);
           }
+        } else {
+          if (faces[0]) {
+            faces[0].rotation.y = initial + angle;
+            updateRPosition();
+          }
+          setAnimating(false);
         }
       }
       // execute a frame
@@ -160,11 +157,8 @@ export default function App(): JSX.Element {
    * TODO: allow passing direction of rotation
    */
   function updateRPosition(): void {
-    // ensure all pieces are loaded
     if (pieces.every((piece) => piece)) {
-      // current rotation of the white face
       const angle: number = faces[0]?.rotation.y || 0;
-      // update position for each piece
       pieces.forEach((piece) => {
         const x: number = piece?.position.x || 0;
         const z: number = piece?.position.z || 0;
@@ -176,11 +170,9 @@ export default function App(): JSX.Element {
         // calculate new x and z coordinates using distance and angular offset in relation to rotating face
         const newZ: number = radius * Math.cos(angle + offset);
         const newX: number = radius * Math.sin(angle + offset);
-        // ensure the piece is loaded and apply new transforms
         if (piece) {
           piece.position.x = newX;
           piece.position.z = newZ;
-          // copy the rotation of the face to properly follow around
           piece.rotation.y = angle;
         }
       });
