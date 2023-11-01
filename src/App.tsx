@@ -1,12 +1,16 @@
 import "./App.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Spline from "@splinetool/react-spline";
 import { Application, SPEObject } from "@splinetool/runtime";
 import BezierEasing from "bezier-easing";
+import Face from "./components/Face";
+import debugColorized from "./components/debugColorized";
 
 const TURN: number = Math.PI / 2;
 const ANIMATION_FRAME_DELAY: number = 16;
 const DURATION: number = 50;
+
+let white: Face;
 
 // TODO: refactor faces into a component taking in a list of pieces that are under its influence
 const faceNames: { [key: string]: string } = {
@@ -92,6 +96,29 @@ export default function App(): JSX.Element {
     return spline.findObjectByName(name + "f");
   }
 
+  let first = true;
+
+  //! ONLY DIRECTLY READ PIECES AND FACES WITHIN THIS FUNCTION
+  useEffect(() => {
+    if (pieces.some((obj) => obj) && faces.some((obj) => obj)) {
+      if (first) {
+        init();
+        first = false;
+      }
+
+      debugColorized(pieces);
+    }
+  }, [pieces, faces]);
+
+  function init(): void {
+    white = new Face(
+      pieces,
+      pieceNames,
+      ["OGW", "OW", "OBW", "BW", "RBW", "RW", "RGW", "GW"],
+      setPieces
+    );
+  }
+
   /**
    * spline scene is finished loading
    * @param spline spline scene
@@ -147,6 +174,7 @@ export default function App(): JSX.Element {
       }
       // execute a frame
       rotateFrame();
+      white.rotate();
     }
   }
 
@@ -159,23 +187,24 @@ export default function App(): JSX.Element {
   function updateRPosition(): void {
     if (pieces.every((piece) => piece)) {
       const angle: number = faces[0]?.rotation.y || 0;
-      pieces.forEach((piece) => {
-        const x: number = piece?.position.x || 0;
-        const z: number = piece?.position.z || 0;
+      for (let i = 0; i < white.indexes.length; i++) {
+        const x: number = pieces[white.indexes[i]]?.position.x || 0;
+        const z: number = pieces[white.indexes[i]]?.position.z || 0;
         // get the distance from the piece to the rotating face
         const radius: number = Math.sqrt(x ** 2 + z ** 2);
         // calculate angular offset from the object to the rotating face
-        const offset: number = Math.atan2(x, z) - (piece?.rotation.y || 0);
+        const offset: number =
+          Math.atan2(x, z) - (pieces[white.indexes[i]]?.rotation.y || 0);
 
         // calculate new x and z coordinates using distance and angular offset in relation to rotating face
         const newZ: number = radius * Math.cos(angle + offset);
         const newX: number = radius * Math.sin(angle + offset);
-        if (piece) {
-          piece.position.x = newX;
-          piece.position.z = newZ;
-          piece.rotation.y = angle;
+        if (pieces[white.indexes[i]]) {
+          (pieces[white.indexes[i]] as SPEObject).position.x = newX;
+          (pieces[white.indexes[i]] as SPEObject).position.z = newZ;
+          (pieces[white.indexes[i]] as SPEObject).rotation.y = angle;
         }
-      });
+      }
     }
   }
 
