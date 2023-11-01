@@ -12,7 +12,6 @@ const DURATION: number = 50;
 
 let white: Face;
 
-// TODO: refactor faces into a component taking in a list of pieces that are under its influence
 const faceNames: { [key: string]: string } = {
   W: "W",
   R: "R",
@@ -139,7 +138,6 @@ export default function App(): JSX.Element {
 
   /**
    * rotate all pieces around the top white face
-   * TODO: make animations dynamic, only affecting a specified set of pieces
    * @param angle amount to rotate in radians
    * @param frames length of animation in frames
    */
@@ -180,7 +178,6 @@ export default function App(): JSX.Element {
 
   /**
    * update piece position and rotation based on the position of the top white face
-   * TODO: allow selection of only specific pieces based on a given face
    * TODO: allow passing axis of rotation
    * TODO: allow passing direction of rotation
    */
