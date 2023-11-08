@@ -1,8 +1,8 @@
 import { SPEObject } from "@splinetool/runtime";
 
 export default class Face {
-	private pieces: Array<SPEObject | undefined>;
-	public keys: string[];
+	public pieces: Array<SPEObject | undefined>;
+	private keys: string[];
 	private setPieces: Function;
 	public indexes: number[] = [];
 

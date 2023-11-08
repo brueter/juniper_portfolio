@@ -84,6 +84,7 @@ export default function App(): JSX.Element {
 	const [faces, setFaces] = useState<Array<SPEObject | undefined>>(Array(6));
 	const [pieces, setPieces] = useState<Array<SPEObject | undefined>>(Array(20));
 	const [animating, setAnimating] = useState<boolean>(false);
+	const [first, setFirst] = useState(true);
 
 	/**
 	 * object names all end with f, gets added here for brevity
@@ -95,17 +96,16 @@ export default function App(): JSX.Element {
 		return spline.findObjectByName(name + "f");
 	}
 
-	let first = true;
-
-	//! ONLY DIRECTLY READ PIECES AND FACES WITHIN THIS FUNCTION
 	useEffect(() => {
 		if (pieces.some((obj) => obj) && faces.some((obj) => obj)) {
 			if (first) {
 				init();
-				first = false;
+				setFirst(false);
+				console.log("init");
+			} else {
+				white.pieces = pieces;
+				debugColorized(pieces);
 			}
-
-			debugColorized(pieces);
 		}
 	}, [pieces, faces]);
 
