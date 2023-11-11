@@ -66,9 +66,6 @@ export default class Face {
 			faces[faceNames[this.face]]?.rotation[this.rotationAxis] || 0;
 
 		let currentFrame: number = 0;
-		console.log(
-			(faces[this.face]!.rotation[this.rotationAxis] * 180) / Math.PI
-		);
 
 		for (let i = 0; i < this.keys.length; i++) {
 			this.offset[i] =
@@ -116,6 +113,7 @@ export default class Face {
 				pieces[this.keys[i]]!.rotation[this.rotationAxis] = angle;
 			}
 		};
+
 		// execute a frame
 		doAnimationFrame();
 

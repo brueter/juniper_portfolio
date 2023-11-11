@@ -4,6 +4,7 @@ import Spline from "@splinetool/react-spline";
 import { Application, SPEObject } from "@splinetool/runtime";
 import Face from "./components/Face";
 import { faceNames, pieceNames } from "./names.ts";
+import * as THREE from "three";
 
 let red: Face;
 let orange: Face;
@@ -190,20 +191,8 @@ export default function App(): JSX.Element {
 			<button type="button" onClick={() => U()}>
 				U
 			</button>
-			<button type="button" onClick={() => D()}>
-				D
-			</button>
 			<button type="button" onClick={() => R()}>
 				R
-			</button>
-			<button type="button" onClick={() => L()}>
-				L
-			</button>
-			<button type="button" onClick={() => F()}>
-				F
-			</button>
-			<button type="button" onClick={() => B()}>
-				B
 			</button>
 		</div>
 	);
