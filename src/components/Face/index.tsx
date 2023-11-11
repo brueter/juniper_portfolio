@@ -1,5 +1,5 @@
 import { SPEObject } from "@splinetool/runtime";
-import { faceNames, pieceNames } from "../../names.ts";
+import { faceNames } from "../../names.ts";
 import BezierEasing from "bezier-easing";
 import debugColorized from "../debugColorized/index.tsx";
 

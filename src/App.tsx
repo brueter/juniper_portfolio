@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import Spline from "@splinetool/react-spline";
 import { Application, SPEObject } from "@splinetool/runtime";
 import Face from "./components/Face";
-import debugColorized from "./components/debugColorized";
 import { faceNames, pieceNames } from "./names.ts";
 
 let red: Face;
