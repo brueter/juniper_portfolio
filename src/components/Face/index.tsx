@@ -1,5 +1,5 @@
 import { SPEObject } from "@splinetool/runtime";
-import { pieceNames } from "../../names.ts";
+import { faceNames, pieceNames } from "../../names.ts";
 import BezierEasing from "bezier-easing";
 import debugColorized from "../debugColorized/index.tsx";
 
@@ -13,24 +13,45 @@ const DURATION: number = 50;
  */
 export default class Face {
 	private keys: string[];
-	private indexes: number[] = [];
 	private setPieces: Function;
 	private setAnimating: Function;
+	private rotationAxis: "x" | "y" | "z";
+	private positionAxis: { [key: string]: "x" | "y" | "z" };
+	private face: "R" | "O" | "Y" | "G" | "B" | "W";
+	private offset: number[] = [];
 
-	constructor(keys: string[], setPieces: Function, setAnimating: Function) {
+	constructor(
+		keys: string[],
+		setPieces: Function,
+		setAnimating: Function,
+		axis: "x" | "y" | "z",
+		face: "R" | "O" | "Y" | "G" | "B" | "W"
+	) {
 		this.keys = keys;
 		this.setPieces = setPieces;
 		this.setAnimating = setAnimating;
+		this.rotationAxis = axis;
+		this.face = face;
 
-		const indexes: number[] = [];
-		for (const key of keys) {
-			const index = Object.keys(pieceNames).indexOf(key);
-			if (index !== -1) {
-				indexes.push(index);
+		this.positionAxis = (() => {
+			switch (axis) {
+				case "x":
+					return {
+						a: "z",
+						b: "y",
+					};
+				case "y":
+					return {
+						a: "x",
+						b: "z",
+					};
+				case "z":
+					return {
+						a: "y",
+						b: "x",
+					};
 			}
-		}
-
-		this.indexes = indexes;
+		})();
 	}
 
 	/**
@@ -38,12 +59,24 @@ export default class Face {
 	 * @param faces state containing all faces
 	 */
 	public animate(
-		pieces: Array<SPEObject | undefined>,
-		faces: Array<SPEObject | undefined>
+		pieces: { [key: string]: SPEObject | undefined } = {},
+		faces: { [key: string]: SPEObject | undefined } = {}
 	) {
-		this.setAnimating(true);
-		const initial: number = faces[0]?.rotation.y || 0;
+		const initial: number =
+			faces[faceNames[this.face]]?.rotation[this.rotationAxis] || 0;
+
 		let currentFrame: number = 0;
+		console.log(
+			(faces[this.face]!.rotation[this.rotationAxis] * 180) / Math.PI
+		);
+
+		for (let i = 0; i < this.keys.length; i++) {
+			this.offset[i] =
+				Math.atan2(
+					pieces[this.keys[i]]!.position[this.positionAxis.a],
+					pieces[this.keys[i]]!.position[this.positionAxis.b]
+				) - faces[this.face]!.rotation[this.rotationAxis];
+		}
 
 		//* mimics css bezier curve math
 		const easing: Function = BezierEasing(0.675, -0.155, 0.53, 1.195);
@@ -52,59 +85,49 @@ export default class Face {
 		const doAnimationFrame = (): void => {
 			// if the animation isnt finished
 			if (currentFrame < DURATION) {
-				if (faces[0]) {
-					faces[0].rotation.y =
-						initial + TURN_ANGLE * easing(currentFrame / DURATION);
-					currentFrame++;
-					rotateObjects();
-					setTimeout(doAnimationFrame, ANIMATION_FRAME_DELAY);
-				}
+				faces[faceNames[this.face]]!.rotation[this.rotationAxis] =
+					initial + TURN_ANGLE * easing(currentFrame / DURATION);
+				rotateObjects();
+				currentFrame++;
+				setTimeout(doAnimationFrame, ANIMATION_FRAME_DELAY);
 			}
 			// animation is done
 			else {
-				if (faces[0]) {
-					faces[0].rotation.y = initial + TURN_ANGLE;
-					rotateObjects();
-				}
+				faces[this.face]!.rotation[this.rotationAxis] = initial + TURN_ANGLE;
+				rotateObjects();
 				this.setAnimating(false);
 			}
 		};
 
 		const rotateObjects = () => {
-			if (pieces.every((piece) => piece)) {
-				const angle: number = faces[0]?.rotation.y || 0;
-				for (let i = 0; i < this.indexes.length; i++) {
-					const x: number = pieces[this.indexes[i]]?.position.x || 0;
-					const z: number = pieces[this.indexes[i]]?.position.z || 0;
-					// get the distance from the piece to the rotating face
-					const radius: number = Math.sqrt(x ** 2 + z ** 2);
-					// calculate angular offset from the object to the rotating face
-					const offset: number =
-						Math.atan2(x, z) - (pieces[this.indexes[i]]?.rotation.y || 0);
+			const angle: number = faces[this.face]!.rotation[this.rotationAxis];
+			for (let i = 0; i < this.keys.length; i++) {
+				const a: number = pieces[this.keys[i]]!.position[this.positionAxis.a];
+				const b: number = pieces[this.keys[i]]!.position[this.positionAxis.b];
+				// get the distance from the piece to the rotating face
+				const radius: number = Math.sqrt(a ** 2 + b ** 2);
+				// calculate angular offset from the object to the rotating face
 
-					// calculate new x and z coordinates using distance and angular offset in relation to rotating face
-					const newZ: number = radius * Math.cos(angle + offset);
-					const newX: number = radius * Math.sin(angle + offset);
-					if (pieces[this.indexes[i]]) {
-						(pieces[this.indexes[i]] as SPEObject).position.x = newX;
-						(pieces[this.indexes[i]] as SPEObject).position.z = newZ;
-						(pieces[this.indexes[i]] as SPEObject).rotation.y = angle;
-					}
-				}
+				// calculate new x and z coordinates using distance and angular offset in relation to rotating face
+				const newA: number = radius * Math.sin(angle + this.offset[i]);
+				const newB: number = radius * Math.cos(angle + this.offset[i]);
+				pieces[this.keys[i]]!.position[this.positionAxis.a] = newA;
+				pieces[this.keys[i]]!.position[this.positionAxis.b] = newB;
+				pieces[this.keys[i]]!.rotation[this.rotationAxis] = angle;
 			}
 		};
 		// execute a frame
 		doAnimationFrame();
 
 		// rearrange pieces in array
-		const rotatedPieces: (SPEObject | undefined)[] = pieces.slice();
+		const rotatedPieces = { ...pieces } || {};
 
 		for (let i = 0; i < this.keys.length; i++) {
-			const newIndex = (i + 2) % this.indexes.length;
-			rotatedPieces[this.indexes[i]] = pieces[this.indexes[newIndex]];
+			rotatedPieces[this.keys[i]] =
+				pieces[this.keys[(i + 2) % this.keys.length]];
 		}
 
+		debugColorized(rotatedPieces);
 		this.setPieces(rotatedPieces);
-		debugColorized(pieces);
 	}
 }

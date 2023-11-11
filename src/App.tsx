@@ -6,6 +6,11 @@ import Face from "./components/Face";
 import debugColorized from "./components/debugColorized";
 import { faceNames, pieceNames } from "./names.ts";
 
+let red: Face;
+let orange: Face;
+let yellow: Face;
+let green: Face;
+let blue: Face;
 let white: Face;
 
 /** cube layout
@@ -44,8 +49,12 @@ let white: Face;
  */
 
 export default function App(): JSX.Element {
-	const [faces, setFaces] = useState<Array<SPEObject | undefined>>(Array(6));
-	const [pieces, setPieces] = useState<Array<SPEObject | undefined>>(Array(20));
+	const [faces, setFaces] = useState<{ [key: string]: SPEObject | undefined }>(
+		{}
+	);
+	const [pieces, setPieces] = useState<{
+		[key: string]: SPEObject | undefined;
+	}>({});
 	const [animating, setAnimating] = useState<boolean>(false);
 	const [first, setFirst] = useState(true);
 
@@ -60,19 +69,54 @@ export default function App(): JSX.Element {
 	}
 
 	useEffect(() => {
-		if (pieces.some((obj) => obj) && faces.some((obj) => obj)) {
-			if (first) {
-				init();
-				setFirst(false);
-			}
+		if (first) {
+			init();
+			setFirst(false);
 		}
 	});
 
 	function init(): void {
+		red = new Face(
+			["RBW", "BW", "OBW", "OB", "RBW", "OYB", "YB", "RYB"],
+			setPieces,
+			setAnimating,
+			"z",
+			"R"
+		);
+		orange = new Face(
+			["OGW", "OW", "OBW", "BW", "RBW", "RW", "RGW", "GW"],
+			setPieces,
+			setAnimating,
+			"x",
+			"O"
+		);
+		yellow = new Face(
+			["OGW", "OW", "OBW", "BW", "RBW", "RW", "RGW", "GW"],
+			setPieces,
+			setAnimating,
+			"z",
+			"Y"
+		);
+		green = new Face(
+			["OGW", "OW", "OBW", "BW", "RBW", "RW", "RGW", "GW"],
+			setPieces,
+			setAnimating,
+			"y",
+			"G"
+		);
+		blue = new Face(
+			["RBW", "BW", "OBW", "OB", "OYB", "YB", "RYB", "RB"],
+			setPieces,
+			setAnimating,
+			"z",
+			"B"
+		);
 		white = new Face(
 			["OGW", "OW", "OBW", "BW", "RBW", "RW", "RGW", "GW"],
 			setPieces,
-			setAnimating
+			setAnimating,
+			"y",
+			"W"
 		);
 	}
 
@@ -81,26 +125,57 @@ export default function App(): JSX.Element {
 	 * @param spline spline scene
 	 */
 	function onLoad(spline: Application): void {
-		const loadedFaces: Array<SPEObject | undefined> = [];
+		const loadedFaces: { [key: string]: SPEObject | undefined } = {};
 		for (const key in faceNames) {
-			loadedFaces.push(get(spline, faceNames[key]));
+			loadedFaces[faceNames[key]] = get(spline, faceNames[key]);
 		}
 		setFaces(loadedFaces);
 
-		const loadedPieces: Array<SPEObject | undefined> = [];
+		const loadedPieces: { [key: string]: SPEObject | undefined } = {};
 		for (const key in pieceNames) {
-			loadedPieces.push(get(spline, pieceNames[key]));
+			loadedPieces[pieceNames[key]] = get(spline, pieceNames[key]);
 		}
 		setPieces(loadedPieces);
 	}
 
 	/**
 	 * rotate all pieces around the top white face
+	 * TODO: allow specifying a face to rotate and direction
 	 */
-	function rotateAnimation(): void {
+	function U(): void {
 		//* don't allow animation to begin while an animation is still being played
 		if (!animating) {
 			white.animate(pieces, faces);
+		}
+	}
+	function D(): void {
+		//* don't allow animation to begin while an animation is still being played
+		if (!animating) {
+			yellow.animate(pieces, faces);
+		}
+	}
+	function R(): void {
+		//* don't allow animation to begin while an animation is still being played
+		if (!animating) {
+			blue.animate(pieces, faces);
+		}
+	}
+	function L(): void {
+		//* don't allow animation to begin while an animation is still being played
+		if (!animating) {
+			green.animate(pieces, faces);
+		}
+	}
+	function F(): void {
+		//* don't allow animation to begin while an animation is still being played
+		if (!animating) {
+			red.animate(pieces, faces);
+		}
+	}
+	function B(): void {
+		//* don't allow animation to begin while an animation is still being played
+		if (!animating) {
+			orange.animate(pieces, faces);
 		}
 	}
 
@@ -113,8 +188,23 @@ export default function App(): JSX.Element {
 				/>
 			</div>
 
-			<button type="button" onClick={() => rotateAnimation()}>
-				Move Cube
+			<button type="button" onClick={() => U()}>
+				U
+			</button>
+			<button type="button" onClick={() => D()}>
+				D
+			</button>
+			<button type="button" onClick={() => R()}>
+				R
+			</button>
+			<button type="button" onClick={() => L()}>
+				L
+			</button>
+			<button type="button" onClick={() => F()}>
+				F
+			</button>
+			<button type="button" onClick={() => B()}>
+				B
 			</button>
 		</div>
 	);

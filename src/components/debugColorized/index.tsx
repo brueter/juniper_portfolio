@@ -1,8 +1,10 @@
 import { SPEObject } from "@splinetool/runtime";
 
-export default function debugColorized(pieces: (SPEObject | undefined)[]) {
-	let input: string = pieces.reduce(
-		(out, piece) => out + piece?.name.replace("f", "") + "  ",
+export default function debugColorized(
+	pieces: { [key: string]: SPEObject | undefined } = {}
+) {
+	let input: string = Object.values(pieces).reduce(
+		(out, piece) => out + (piece?.name.replace("f", "") || "") + "  ",
 		""
 	);
 
