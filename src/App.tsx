@@ -4,12 +4,7 @@ import Spline from "@splinetool/react-spline";
 import { Application, SPEObject } from "@splinetool/runtime";
 import Face from "./components/Face";
 import { faceNames, pieceNames } from "./names.ts";
-import * as THREE from "three";
 
-let red: Face;
-let orange: Face;
-let yellow: Face;
-let green: Face;
 let blue: Face;
 let white: Face;
 
@@ -76,34 +71,6 @@ export default function App(): JSX.Element {
 	});
 
 	function init(): void {
-		red = new Face(
-			["RBW", "BW", "OBW", "OB", "RBW", "OYB", "YB", "RYB"],
-			setPieces,
-			setAnimating,
-			"z",
-			"R"
-		);
-		orange = new Face(
-			["OGW", "OW", "OBW", "BW", "RBW", "RW", "RGW", "GW"],
-			setPieces,
-			setAnimating,
-			"x",
-			"O"
-		);
-		yellow = new Face(
-			["OGW", "OW", "OBW", "BW", "RBW", "RW", "RGW", "GW"],
-			setPieces,
-			setAnimating,
-			"z",
-			"Y"
-		);
-		green = new Face(
-			["OGW", "OW", "OBW", "BW", "RBW", "RW", "RGW", "GW"],
-			setPieces,
-			setAnimating,
-			"y",
-			"G"
-		);
 		blue = new Face(
 			["RBW", "BW", "OBW", "OB", "OYB", "YB", "RYB", "RB"],
 			setPieces,
@@ -146,12 +113,6 @@ export default function App(): JSX.Element {
 		//* don't allow animation to begin while an animation is still being played
 		if (!animating) {
 			white.animate(pieces, faces);
-		}
-	}
-	function D(): void {
-		//* don't allow animation to begin while an animation is still being played
-		if (!animating) {
-			yellow.animate(pieces, faces);
 		}
 	}
 	function R(): void {
