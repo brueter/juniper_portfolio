@@ -160,24 +160,6 @@ export default function App(): JSX.Element {
 			blue.animate(pieces, faces);
 		}
 	}
-	function L(): void {
-		//* don't allow animation to begin while an animation is still being played
-		if (!animating) {
-			green.animate(pieces, faces);
-		}
-	}
-	function F(): void {
-		//* don't allow animation to begin while an animation is still being played
-		if (!animating) {
-			red.animate(pieces, faces);
-		}
-	}
-	function B(): void {
-		//* don't allow animation to begin while an animation is still being played
-		if (!animating) {
-			orange.animate(pieces, faces);
-		}
-	}
 
 	return (
 		<div className="App">
