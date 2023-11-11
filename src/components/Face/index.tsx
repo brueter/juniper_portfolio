@@ -62,6 +62,7 @@ export default class Face {
 		pieces: { [key: string]: SPEObject | undefined } = {},
 		faces: { [key: string]: SPEObject | undefined } = {}
 	) {
+		this.setAnimating(true);
 		const initial: number =
 			faces[faceNames[this.face]]?.rotation[this.rotationAxis] || 0;
 
